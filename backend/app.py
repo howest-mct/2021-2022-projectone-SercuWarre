@@ -10,6 +10,7 @@ from flask_socketio import SocketIO, emit, send
 from flask import Flask, jsonify
 from repositories.DataRepository import DataRepository
 from datetime import datetime
+from subprocess import check_output
 
 from selenium import webdriver
 
@@ -40,14 +41,19 @@ def temp_inlezen():
         if temp_c != temp_prev:
             DataRepository.create_historiek(1,datetime.now(),temp_c, "temperatuurwaarde")
             print(F'Temp: {temp_c}ºC {datetime.now()} ')
+            socketio.emit('B2F_send_temp', {'tempwaarde': temp_c},broadcast=True)
         temp_prev=temp_c
-        socketio.emit('B2F_send_temp', {'tempwaarde': temp_c},broadcast=True)
 
 
-
-
-
-
+def get_ip():
+    # perv_wifi=""
+    while True:
+        ip=check_output(['hostname','--all-ip-addresses'])
+        # print(ip)
+        wifi=str(ip[16:30])
+        # print(wifi)
+        socketio.emit('B2F_send_ip',wifi,broadcast=True)
+        
 # Code voor Flask
 
 app = Flask(__name__)
@@ -84,6 +90,7 @@ def temp():
 @socketio.on('connect')
 def initial_connection():
     print('A new client connect')
+    
     # # Send to the client!
     # vraag de status op van de lampen uit de DB
    
@@ -95,26 +102,9 @@ def initial_connection():
 
 
 
-# @socketio.on('F2B_sent')
-# def send_temp(data):
-#     # Ophalen van de data
-#     temperatuur = temp_inlezen()
-#     # print(data)
-#     # print(f" de temperatuur is {temperatuur}")
-#     waarde = temp_inlezen()
-#     emit('B2F_connected',{'tempwaarde': waarde},broadcast=True)
-
-#     # Stel de status in op de DB
-#     res = DataRepository.update_status_lamp(lamp_id, new_status)
-
-#     # Vraag de (nieuwe) status op van de lamp en stuur deze naar de frontend.
-#     data = DataRepository.read_status_lamp_by_id(lamp_id)
-#     socketio.emit('B2F_verandering_lamp', {'lamp': data}, broadcast=True)
-
-#     # Indien het om de lamp van de TV kamer gaat, dan moeten we ook de hardware aansturen.
-#     if lamp_id == '3':
-#         print(f"TV kamer moet switchen naar {new_status} !")
-#         GPIO.output(ledPin, new_status)
+@socketio.on('F2B_sent')
+def listenToBtn(data):
+    print(data)
 
 
 
@@ -170,10 +160,14 @@ def start_chrome_thread():
     chromeThread.start()
 
 def start_temp_thread():
-    print("**** Starting CHROME ****")
+    print("**** Starting temp ****")
     tempmeasure = threading.Thread(target=temp_inlezen, args=(), daemon=True)
     tempmeasure.start()
 
+def start_ip_thread():
+    print("**** Starting ip ****")
+    ipSent = threading.Thread(target=get_ip, args=(), daemon=True)
+    ipSent.start()
 # ANDERE FUNCTIES
 
 
@@ -181,9 +175,11 @@ if __name__ == '__main__':
     try:
         start=time.time()
         setup_gpio()
-        # start_thread()
         start_chrome_thread()
+        # start_thread()
+        start_ip_thread()
         start_temp_thread()
+    
         stop=time.time()
         
         print(stop-start)

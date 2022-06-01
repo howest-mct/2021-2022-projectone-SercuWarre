@@ -4,11 +4,13 @@ const socket = io(`http://${lanIP}`);
 
 
 const listenToUI = function () {
-  const temperatuur = document.querySelector(".js-waarde");
-  waarde=temperatuur.temp
-      socket.emit("F2B_sent", {'temp': waarde });
+  let btn = document.querySelector('.js-relais');
+  console.log("hi")
+  btn.addEventListener('click', (e) => {
+    console.log(btn)
+  }
+  )};
 
-};
 
 const listenToSocket = function () {
   socket.on("connected", function () {
@@ -21,6 +23,7 @@ const listenToSocket = function () {
     console.log(waarde)
     htmlstring=`temperatuur waarde: ${waarde} ºC`
     document.querySelector('.js-waarde').innerHTML=htmlstring
+    
         // socket.emit("F2B_sent", {'temp': waarde });
 
     // for (const temp of jsonObject) {
@@ -34,7 +37,17 @@ const listenToSocket = function () {
     //     }
     //   }
     // }
+
   });
+   
+  socket.on("B2F_send_ip", function (jsonObject) {
+    // console.log(jsonObject);
+    // console.log(jsonObject.slice(2,15))
+    ip=jsonObject.slice(2,15)
+
+    document.querySelector('.js-ip').innerHTML= `<p class="js-ip">wifi: ${ip}</p>`
+
+      });
 
 //   socket.on("B2F_verandering_lamp", function (jsonObject) {
 //     console.log("Er is een status van een lamp veranderd");
@@ -58,8 +71,13 @@ const listenToSocket = function () {
 
 };
 
+
 document.addEventListener("DOMContentLoaded", function () {
-  console.info("DOM geladen 🍺");
+  console.log("DOM geladen 🍺");
   listenToUI();
+  console.log("hi")
   listenToSocket();
+  console.log('penis')
+ 
+  
 });
