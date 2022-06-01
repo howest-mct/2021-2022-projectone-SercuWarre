@@ -5,11 +5,16 @@ const socket = io(`http://${lanIP}`);
 
 const listenToUI = function () {
   let btn = document.querySelector('.js-relais');
-  console.log("hi")
+  
+  let status = 0
   btn.addEventListener('click', (e) => {
-    console.log(btn)
+  status++
+  console.log(status)
+  if (status==2){
+    status=0
   }
-  )};
+  socket.emit('F2B_sent', {status})
+  })};
 
 
 const listenToSocket = function () {
@@ -75,9 +80,8 @@ const listenToSocket = function () {
 document.addEventListener("DOMContentLoaded", function () {
   console.log("DOM geladen 🍺");
   listenToUI();
-  console.log("hi")
   listenToSocket();
-  console.log('penis')
+
  
   
 });

@@ -24,7 +24,8 @@ from selenium import webdriver
 def setup_gpio():
     GPIO.setwarnings(False)
     GPIO.setmode(GPIO.BCM)
-
+    GPIO.setup(6, GPIO.OUT)
+    GPIO.output(6, GPIO.HIGH)
     # temp_inlezen()
     
   
@@ -105,8 +106,16 @@ def initial_connection():
 @socketio.on('F2B_sent')
 def listenToBtn(data):
     print(data)
+    print(data['status'])
+    if data['status']==0:
+        GPIO.output(6, GPIO.LOW)
+        # print("hi")
 
-
+    elif data['status']==1:
+        GPIO.output(6, GPIO.HIGH)
+        # print("po")
+    else:
+        print("fout")
 
 # START een thread op. Belangrijk!!! Debugging moet UIT staan op start van de server, anders start de thread dubbel op
 # werk enkel met de packages gevent en gevent-websocket.
