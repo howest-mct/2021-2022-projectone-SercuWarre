@@ -693,7 +693,27 @@ a:focus {
   }
 }
 
-
+.c-power-btn {
+  margin: auto;
+  /* margin-top: 20px; */
+  background: #38434a;
+  border-radius: 5px;
+  color: white;
+  cursor: pointer;
+  font-family: Roboto;
+  font-weight: 800;
+  font-size: 1.9em;
+  height: 65px;
+  letter-spacing: 0.2px;
+  line-height: 65px;
+  text-align: center;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  width: 150px;
+  transition: none;
+}
 /*------------------------------------*\
   #UTILITIES
 \*------------------------------------*/
