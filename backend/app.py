@@ -1,10 +1,12 @@
 import time
 from RPi import GPIO
 from mfrc522 import SimpleMFRC522
+from MFRC522 import MFRC522
 from helpers.klasseknop import Button
 import threading
 import spidev
 import time
+from MFRC522 import MFRC522
 from MCP3008 import MCP3008
 from flask_cors import CORS
 from flask_socketio import SocketIO, emit, send
@@ -33,19 +35,21 @@ def setup_gpio():
   
 def kaart_lezer():
     global readerstatus
+    reader = SimpleMFRC522()
     while True:
         if tempstatus==0:
             # try:
                 readerstatus=1
-                reader = SimpleMFRC522()
                 id, text = reader.read()
                 print("hi")
                 
                 print(id)
                 print(text)
+                # MFRC522.Close_MFRC522()
                 readerstatus=0
                 open_door()
                 time.sleep(1)
+                
         else:
             print( F"{readerstatus} , {tempstatus}")
             time.sleep(0.5)
@@ -63,10 +67,11 @@ def temp_inlezen():
             temp_c = round((x* 3.3/1023)*100, 2)
             # Print both temperatures
             if temp_c != temp_prev:
-                # DataRepository.create_historiek(1,datetime.now(),temp_c, "temperatuurwaarde")
+                DataRepository.create_historiek(1,0,datetime.now(),temp_c, "temperatuurwaarde")
                 print(F'Temp: {temp_c}ºC {datetime.now()} ')
                 socketio.emit('B2F_send_temp', {'tempwaarde': temp_c},broadcast=True)
                 temp_prev=temp_c
+                mcp.close()
                 tempstatus=0
                 time.sleep(1)
         else:
@@ -116,7 +121,20 @@ def temp():
 @socketio.on('connect')
 def initial_connection():
     print('A new client connect')
-    
+    status=DataRepository.read_historiek()
+    for item in status:
+        # print(item)
+        print("/n")
+        datum=str(item['actiedatum'])
+        item['actiedatum']=datum
+        print(item)
+        socketio.emit('B2F_historiek',  item)
+
+    # print(status)
+    # j= jsonify(
+    #                 {"history": status}
+    #             ),
+    # print(j)
     # # Send to the client!
     # vraag de status op van de lampen uit de DB
    
@@ -127,17 +145,7 @@ def initial_connection():
 
 @socketio.on('F2B_sent')
 def listenToBtn(data):
-    print(data)
-    print(data['status'])
-    if data['status']==0:
-        GPIO.output(6, GPIO.LOW)
-        # print("hi")
-
-    elif data['status']==1:
-        GPIO.output(6, GPIO.HIGH)
-        # print("po")
-    else:
-        print("fout")
+    open_door()
 
 
 
@@ -171,8 +179,10 @@ def start_chrome_kiosk():
         pass
 def open_door():
     GPIO.output(6, GPIO.HIGH)
+    DataRepository.create_historiek(0,2,datetime.now(),1, "deur toe")
     time.sleep(3)
     GPIO.output(6, GPIO.LOW)
+    DataRepository.create_historiek(0,1,datetime.now(),0, "deur open")
 
 def start_chrome_thread():
     print("**** Starting CHROME ****")
