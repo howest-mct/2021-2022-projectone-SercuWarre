@@ -12,7 +12,7 @@ class DataRepository:
 
     @staticmethod
     def read_historiek():
-        sql = "SELECT * from historiek"
+        sql = "SELECT * from historiek where commentaar like 'deur%'"
         return Database.get_rows(sql)
 
     # @staticmethod

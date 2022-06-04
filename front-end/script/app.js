@@ -43,6 +43,16 @@ const listenToSocket = function () {
       });
   socket.on("B2F_historiek", function(jsonObject){
     console.log(jsonObject)
+    document.querySelector('.js-table').innerHTML+= `
+    <tr>
+    <td>${jsonObject.volgnummer} </td>
+    <td>${jsonObject.deviceid} </td>
+    <td>${jsonObject.actieid}</td>
+    <td>${jsonObject.actiedatum}</td>
+    <td>${jsonObject.waarde}</td>
+    <td>${jsonObject.commentaar}</td>
+  </tr>`
+
     
   })
 };
