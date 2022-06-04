@@ -34,7 +34,7 @@ class DataRepository:
         return Database.execute_sql(sql, params)
     
     @staticmethod 
-    def create_historiek(deviceid,actiedatum,waarde,commentaar):
-        sql = "INSERT INTO historiek (deviceid, actiedatum, waarde, commentaar) VALUES (%s,%s,%s,%s)"
-        params = [deviceid, actiedatum, waarde, commentaar]
+    def create_historiek(deviceid,actieid,actiedatum,waarde,commentaar):
+        sql = "INSERT INTO historiek (deviceid, actieid,actiedatum, waarde, commentaar) VALUES (%s,%s,%s,%s,%s)"
+        params = [deviceid,actieid, actiedatum, waarde, commentaar]
         return Database.execute_sql(sql, params)

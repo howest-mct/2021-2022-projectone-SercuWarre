@@ -1,9 +1,12 @@
 import time
 from RPi import GPIO
+from mfrc522 import SimpleMFRC522
+from MFRC522 import MFRC522
 from helpers.klasseknop import Button
 import threading
 import spidev
 import time
+from MFRC522 import MFRC522
 from MCP3008 import MCP3008
 from flask_cors import CORS
 from flask_socketio import SocketIO, emit, send
@@ -13,37 +16,67 @@ from datetime import datetime
 from subprocess import check_output
 
 from selenium import webdriver
+        
+        
 
 # from selenium import webdriver
 # from selenium.webdriver.chrome.options import Options
-
-
-
+readerstatus=0
+tempstatus=0
 
 # Code voor Hardware
 def setup_gpio():
     GPIO.setwarnings(False)
     GPIO.setmode(GPIO.BCM)
+    GPIO.setup(6, GPIO.OUT)
+    GPIO.output(6, GPIO.LOW)
 
     # temp_inlezen()
-    
   
-
-def temp_inlezen():
-    temp_prev=0
+def kaart_lezer():
+    global readerstatus
+    reader = SimpleMFRC522()
     while True:
-        mcp=MCP3008()
-        x = mcp.read()
-        # print(x)
-        temp_c = round((x* 3.3/1023)*100, 2)
-        # Print both temperatures
-        time.sleep(1)
-        if temp_c != temp_prev:
-            DataRepository.create_historiek(1,datetime.now(),temp_c, "temperatuurwaarde")
-            print(F'Temp: {temp_c}ºC {datetime.now()} ')
-            socketio.emit('B2F_send_temp', {'tempwaarde': temp_c},broadcast=True)
-        temp_prev=temp_c
-
+        if tempstatus==0:
+            # try:
+                readerstatus=1
+                id, text = reader.read()
+                print("hi")
+                
+                print(id)
+                print(text)
+                # MFRC522.Close_MFRC522()
+                readerstatus=0
+                open_door()
+                time.sleep(1)
+                
+        else:
+            print( F"{readerstatus} , {tempstatus}")
+            time.sleep(0.5)
+            # except  as x:
+                # print(x)
+def temp_inlezen():
+    global tempstatus
+    while True:
+        if readerstatus==0:
+            tempstatus=1
+            temp_prev=0
+            mcp=MCP3008()
+            x = mcp.read()
+            # print(x)
+            temp_c = round((x* 3.3/1023)*100, 2)
+            # Print both temperatures
+            if temp_c != temp_prev:
+                DataRepository.create_historiek(1,0,datetime.now(),temp_c, "temperatuurwaarde")
+                print(F'Temp: {temp_c}ºC {datetime.now()} ')
+                socketio.emit('B2F_send_temp', {'tempwaarde': temp_c},broadcast=True)
+                temp_prev=temp_c
+                mcp.close()
+                tempstatus=0
+                time.sleep(1)
+        else:
+            print( F"{readerstatus} , {tempstatus}")
+            time.sleep(0.4)
 
 def get_ip():
     # perv_wifi=""
@@ -53,7 +86,8 @@ def get_ip():
         wifi=str(ip[16:30])
         # print(wifi)
         socketio.emit('B2F_send_ip',wifi,broadcast=True)
-        
+        time.sleep(0.001)
+
 # Code voor Flask
 
 app = Flask(__name__)
@@ -82,47 +116,38 @@ def temp():
     
     print('A new client connect')
     # # Send to the client!
-    # vraag de status op van de lampen uit de DB
-    # waarde = temp_inlezen()
-    # return  f"{waarde}"
-
+   
 
 @socketio.on('connect')
 def initial_connection():
     print('A new client connect')
-    
+    status=DataRepository.read_historiek()
+    for item in status:
+        # print(item)
+        print("/n")
+        datum=str(item['actiedatum'])
+        item['actiedatum']=datum
+        print(item)
+        socketio.emit('B2F_historiek',  item)
+
+    # print(status)
+    # j= jsonify(
+    #                 {"history": status}
+    #             ),
+    # print(j)
     # # Send to the client!
     # vraag de status op van de lampen uit de DB
    
 
 
-# def sent_temp():
-#     waarde = temp_inlezen()
-#     emit('B2F_connected', {'tempwaarde': waarde},broadcast=True)
 
 
 
 @socketio.on('F2B_sent')
 def listenToBtn(data):
-    print(data)
+    open_door()
 
 
-
-# START een thread op. Belangrijk!!! Debugging moet UIT staan op start van de server, anders start de thread dubbel op
-# werk enkel met de packages gevent en gevent-websocket.
-# def all_out():
-#     while True:
-#         print('*** We zetten alles uit **')
-#         DataRepository.update_status_alle_lampen(0)
-#         GPIO.output(ledPin, 0)
-#         status = DataRepository.read_status_lampen()
-#         socketio.emit('B2F_status_lampen', {'lampen': status})
-#         time.sleep(15)
-
-# def start_thread():
-#     print("**** Starting THREAD ****")
-#     thread = threading.Thread(target=temp_inlezen, args=(), daemon=True)
-#     thread.start()
 
 
 def start_chrome_kiosk():
@@ -152,7 +177,12 @@ def start_chrome_kiosk():
     driver.get("http://localhost")
     while True:
         pass
-
+def open_door():
+    GPIO.output(6, GPIO.HIGH)
+    DataRepository.create_historiek(0,2,datetime.now(),1, "deur toe")
+    time.sleep(3)
+    GPIO.output(6, GPIO.LOW)
+    DataRepository.create_historiek(0,1,datetime.now(),0, "deur open")
 
 def start_chrome_thread():
     print("**** Starting CHROME ****")
@@ -168,6 +198,11 @@ def start_ip_thread():
     print("**** Starting ip ****")
     ipSent = threading.Thread(target=get_ip, args=(), daemon=True)
     ipSent.start()
+
+def start_rfid_thread():
+    print("**** Starting RFID ****")
+    Rfid = threading.Thread(target=kaart_lezer, args=(), daemon=True)
+    Rfid.start()
 # ANDERE FUNCTIES
 
 
@@ -177,9 +212,12 @@ if __name__ == '__main__':
         setup_gpio()
         start_chrome_thread()
         # start_thread()
-        start_ip_thread()
         start_temp_thread()
-    
+        time.sleep(1)
+        start_rfid_thread()
+        start_ip_thread()
+
+        # time.sleep(2)
         stop=time.time()
         
         print(stop-start)
@@ -187,6 +225,8 @@ if __name__ == '__main__':
         socketio.run(app, debug=False, host='0.0.0.0')
     except KeyboardInterrupt:
         print ('KeyboardInterrupt exception is caught')
+        GPIO.cleanup()
+
     finally:
         GPIO.cleanup()
 

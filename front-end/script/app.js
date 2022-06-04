@@ -1,15 +1,22 @@
 const lanIP = `${window.location.hostname}:5000`;
 const socket = io(`http://${lanIP}`);
 
+const showTable=function(){
 
+}
 
 const listenToUI = function () {
   let btn = document.querySelector('.js-relais');
-  console.log("hi")
+  
+  let status = 0
   btn.addEventListener('click', (e) => {
-    console.log(btn)
+  status++
+  console.log(status)
+  if (status==2){
+    status=0
   }
-  )};
+  socket.emit('F2B_sent', {status})
+  })};
 
 
 const listenToSocket = function () {
@@ -23,20 +30,6 @@ const listenToSocket = function () {
     console.log(waarde)
     htmlstring=`temperatuur waarde: ${waarde} ºC`
     document.querySelector('.js-waarde').innerHTML=htmlstring
-    
-        // socket.emit("F2B_sent", {'temp': waarde });
-
-    // for (const temp of jsonObject) {
-    //   const room = document.querySelector(`.js-room[data-idlamp="${lamp.id}"]`);
-    //   if (room) {
-    //     const knop = room.querySelector(".js-power-btn");
-    //     knop.dataset.statuslamp = lamp.status;
-    //     clearClassList(room);
-    //     if (lamp.status == 1) {
-    //       room.classList.add("c-room--on");
-    //     }
-    //   }
-    // }
 
   });
    
@@ -48,36 +41,18 @@ const listenToSocket = function () {
     document.querySelector('.js-ip').innerHTML= `<p class="js-ip">wifi: ${ip}</p>`
 
       });
-
-//   socket.on("B2F_verandering_lamp", function (jsonObject) {
-//     console.log("Er is een status van een lamp veranderd");
-//     console.log(jsonObject.lamp.id);
-//     console.log(jsonObject.lamp.status);
-
-//     const room = document.querySelector(`.js-room[data-idlamp="${jsonObject.lamp.id}"]`);
-//     if (room) {
-//       const knop = room.querySelector(".js-power-btn"); //spreek de room, als start. Zodat je enkel knop krijgt die in de room staat
-//       knop.dataset.statuslamp = jsonObject.lamp.status;
-
-//       clearClassList(room);
-//       if (jsonObject.lamp.status == 1) {
-//         room.classList.add("c-room--on");
-//       }
-//     }
-//   });
-//   socket.on("B2F_verandering_lamp_from_HRDWR", function (jsonObject) {
-//     console.log(jsonObject)
-//   }) 
-
+  socket.on("B2F_historiek", function(jsonObject){
+    console.log(jsonObject)
+    
+  })
 };
 
 
 document.addEventListener("DOMContentLoaded", function () {
   console.log("DOM geladen 🍺");
   listenToUI();
-  console.log("hi")
   listenToSocket();
-  console.log('penis')
+  showTable();
  
   
 });
