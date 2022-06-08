@@ -14,7 +14,10 @@ class DataRepository:
     def read_historiek():
         sql = "SELECT * from historiek where commentaar like 'deur%'"
         return Database.get_rows(sql)
-
+    @staticmethod
+    def read_user():
+        sql="SELECT * from user"
+        return Database.get_rows(sql)
     # @staticmethod
     # def read_status_lamp_by_id(id):
     #     sql = "SELECT * from lampen WHERE id = %s"
@@ -38,3 +41,9 @@ class DataRepository:
         sql = "INSERT INTO historiek (deviceid, actieid,actiedatum, waarde, commentaar) VALUES (%s,%s,%s,%s,%s)"
         params = [deviceid,actieid, actiedatum, waarde, commentaar]
         return Database.execute_sql(sql, params)
+    
+    @staticmethod
+    def create_frigo_historiek(userid,datum):
+        sql="INSERT INTO frigohistoriek (userid, datum) VALUES (%s,%s)"
+        params=[userid,datum]
+        return Database.execute_sql(sql,params)
