@@ -93,7 +93,7 @@ h1 {
   font-size: 48px;
   line-height: 48px;
   margin: 0 0 24px;
-  
+
 }
 
 h2 {
@@ -165,7 +165,7 @@ hr {
 
 a,
 a:visited {
-  color: #5051DB;
+  color: purple;
   transition: all .1s ease-in-out;
 }
 
@@ -194,6 +194,35 @@ th {
 
 tr:nth-child(even) {
   background-color: #dddddd;
+}
+
+.button {
+  background-color: cyan;
+  /* Green */
+  border: none;
+  color: white;
+  padding: 15px 32px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 16px;
+}
+
+table {
+  border-collapse: collapse;
+  border-spacing: 0;
+  width: 100%;
+  border: 1px solid #ddd;
+}
+
+th,
+td {
+  text-align: left;
+  padding: 8px;
+}
+
+tr:nth-child(even) {
+  background-color: #f2f2f2
 }
 
 /*------------------------------------*\
@@ -279,9 +308,9 @@ tr:nth-child(even) {
   flex-wrap: wrap;
 }
 
-  .o-layout__item {
-    flex-basis: 100%;
-  }
+.o-layout__item {
+  flex-basis: 100%;
+}
 
 /* gutter modifiers, these affect o-layout__item too */
 
@@ -425,11 +454,21 @@ tr:nth-child(even) {
   padding: 0;
 }
 
-
+div{
+  display: block;
+}
 /*------------------------------------*\
   #COMPONENTS
 \*------------------------------------*/
+.c-table {
+  overflow-x: scroll ;
+  position: relative;
+}
 
+.c-table-body{
+  /* display: block; */
+  overflow: auto;
+}
 /*
     Component: header
     ---
@@ -731,6 +770,7 @@ tr:nth-child(even) {
   width: 150px;
   transition: none;
 }
+
 /*------------------------------------*\
   #UTILITIES
 \*------------------------------------*/

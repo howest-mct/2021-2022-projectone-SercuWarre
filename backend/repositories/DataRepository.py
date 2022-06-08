@@ -12,11 +12,16 @@ class DataRepository:
 
     @staticmethod
     def read_historiek():
-        sql = "SELECT * from historiek where commentaar like 'deur%'"
+        sql = "SELECT * from historiek where commentaar like 'deur%' ORDER BY actiedatum desc limit 100"
         return Database.get_rows(sql)
     @staticmethod
     def read_user():
         sql="SELECT * from user"
+        return Database.get_rows(sql)
+
+    @staticmethod
+    def read_temp():
+        sql="SELECT * from historiek where commentaar like 'temp%' ORDER BY actiedatum desc  limit 100"
         return Database.get_rows(sql)
     # @staticmethod
     # def read_status_lamp_by_id(id):

@@ -34,13 +34,13 @@ def kaart_lezer():
     try:
         reader = SimpleMFRC522()
         while True:
-                print("hi")
+                # print("hi")
                 id, text = reader.read()
                 print(id)
                 ids=str(id)
                 print(text)    
                 open_door()
-                time.sleep(1)
+                # time.sleep(1)
                 DataRepository.create_historiek(0,3,datetime.now(),0, "badge scanned")
                 data=DataRepository.read_user()
                 for item in data:
@@ -63,10 +63,22 @@ def temp_inlezen():
             uitkomst = line[line.rfind("t"):]
             geheel = int(uitkomst[2:])
             temperatuur = geheel/1000
-            if temperatuur<=temp_prev-0.5 or temperatuur>=temp_prev+0.5:
+            if temperatuur<=temp_prev-0.08 or temperatuur>=temp_prev+0.08 :
                 print(f"T={temperatuur}")
                 DataRepository.create_historiek(1,0,datetime.now(),temperatuur, "temperatuur Waarde")
                 socketio.emit('B2F_send_temp', {'tempwaarde': temperatuur},broadcast=True)
+                item=DataRepository.read_temp()
+                # print(item)
+                status=[]
+                for i in item:
+                    # print(i)
+                    datum=str(i['actiedatum'])
+                    i['actiedatum']=datum
+                    status.append(i)
+                    
+                status.reverse()
+                socketio.emit('B2F_temp_chart',{'waarde':status},broadcast=True)
+               
                 temp_prev=temperatuur
             time.sleep(0.001)
 
@@ -128,7 +140,6 @@ def initial_connection():
 
    
    
-
 
 
 

@@ -1,5 +1,32 @@
-<table class="js-table">
-  <tr>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Project_one</title>
+    <link rel="icon" href="img/favicon.svg" />
+    <link rel="apple-touch-icon" href="img/apple-touch-icon.png" />
+    <!-- <link rel="manifest" href="img/manifest.json" /> -->
+    <link rel="icon" href="img/favicon.png" />
+    <link rel="icon" href="img/favicon.ico" />
+    <link rel="stylesheet" href="style/screen.css" />
+    <script src="https://cdn.socket.io/4.0.1/socket.io.min.js" integrity="sha384-LzhRnpGmQP+lOvWruF/lgkcqD+WDVt9fU3H4BWmwP5u5LTmkUGafMcpZKNObVMLU" crossorigin="anonymous"></script>
+    <script src="script/app.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <meta http-equiv="refresh" content="60">
+</head>
+<body>
+<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16">
+  <path id="path" d="M20,11H7.8l5.6-5.6L12,4,4,12l8,8,1.4-1.4L7.8,13H20V11Z" transform="translate(-4 -4)" fill="#005980" fill-rule="evenodd" opacity="0.54"/>
+</svg>
+<div>
+  <canvas id="myChart"></canvas>
+</div>
+<div>
+  <table  >
+    <thead>
+       <tr>
     <th>volgnummer</th>
     <th>deviceid</th>
     <th>actieid</th>
@@ -7,6 +34,11 @@
     <th>waarde</th>
     <th>commentaar</th>
   </tr>
-  <tr class="js-table">
+    </thead>
+  <tbody class="js-table c-table-body">
   
-  </tr>
+  </tbody>
+</table>
+</div>
+
+</body>
