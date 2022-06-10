@@ -12,7 +12,7 @@ class DataRepository:
 
     @staticmethod
     def read_historiek():
-        sql = "SELECT * from historiek where commentaar like 'deur%' ORDER BY actiedatum desc limit 100"
+        sql = "SELECT * from historiek where commentaar like 'deur%' ORDER BY actiedatum desc limit 50"
         return Database.get_rows(sql)
     @staticmethod
     def read_user():
@@ -21,25 +21,9 @@ class DataRepository:
 
     @staticmethod
     def read_temp():
-        sql="SELECT * from historiek where commentaar like 'temp%' ORDER BY actiedatum desc  limit 100"
+        sql="SELECT * from historiek where commentaar like 'temp%' ORDER BY actiedatum desc  limit 50"
         return Database.get_rows(sql)
-    # @staticmethod
-    # def read_status_lamp_by_id(id):
-    #     sql = "SELECT * from lampen WHERE id = %s"
-    #     params = [id]
-    #     return Database.get_one_row(sql, params)
-
-    @staticmethod
-    def update_status_lamp(id, status):
-        sql = "UPDATE lampen SET status = %s WHERE id = %s"
-        params = [status, id]
-        return Database.execute_sql(sql, params)
-
-    @staticmethod
-    def update_status_alle_lampen(status):
-        sql = "UPDATE lampen SET status = %s"
-        params = [status]
-        return Database.execute_sql(sql, params)
+    
     
     @staticmethod 
     def create_historiek(deviceid,actieid,actiedatum,waarde,commentaar):
@@ -48,7 +32,7 @@ class DataRepository:
         return Database.execute_sql(sql, params)
     
     @staticmethod
-    def create_frigo_historiek(userid,datum):
-        sql="INSERT INTO frigohistoriek (userid, datum) VALUES (%s,%s)"
-        params=[userid,datum]
+    def create_frigo_historiek(userid,naam,datum):
+        sql="INSERT INTO frigohistoriek (userid,naam, datum) VALUES (%s,%s,%s)"
+        params=[userid,naam,datum]
         return Database.execute_sql(sql,params)

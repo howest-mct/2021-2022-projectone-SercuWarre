@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Project_one</title>
+    <link rel="icon" href="img/favicon.svg" />
+    <link rel="apple-touch-icon" href="img/apple-touch-icon.png" />
+    <!-- <link rel="manifest" href="img/manifest.json" /> -->
+    <link rel="icon" href="img/favicon.png" />
+    <link rel="icon" href="img/favicon.ico" />
+    <link rel="stylesheet" href="style/screen.css" />
+    <script src="https://cdn.socket.io/4.0.1/socket.io.min.js" integrity="sha384-LzhRnpGmQP+lOvWruF/lgkcqD+WDVt9fU3H4BWmwP5u5LTmkUGafMcpZKNObVMLU" crossorigin="anonymous"></script>
+    <script src="script/app.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.2/css/all.min.css" integrity="sha512-HK5fgLBL+xu6dm/Ii3z4xhlSUyZgTT9tuc/hSrtw6uzJOvgRr2a9jyxxT1ely+B+xFAmJKVSTbpM/CuL7qxO8w==" crossorigin="anonymous" />
+
+    <meta http-equiv="refresh" content="60">
+</head>
+<body>
+    <a href="/"> <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16">
+  <path id="path" d="M20,11H7.8l5.6-5.6L12,4,4,12l8,8,1.4-1.4L7.8,13H20V11Z" transform="translate(-4 -4)" fill="#005980" fill-rule="evenodd" opacity="0.54"/>
+</svg></a>
+
+  
+<div class="o-layout o-layout--justify-center"">
+  <h1>Uithalen</h1>
+</div> 
+  
+  <div class=" o-row o-layout--justify-space-evenly" >
+    <div class="c-direction">
+      <img class="o-foto o-flesje" src="img/stella.png" alt="stella">
+      <div class="number-input">
+        <button  class="js-minus minus"></button>
+        <input class=" js-quantity quantity" min="0" name="quantity" value="0" type="number">
+        <button  class=" js-plus plus"></button>
+      </div>
+
+    </div>
+    <div class="c-direction">
+      <img class="o-foto o-flesje" src="img/jup.png" alt=" jupiler">
+      <div class="number-input">
+        <button  class=" js-minus minus"></button>
+        <input class="js-quantity" min="0" name="quantity" value="0" type="number">
+        <button " class=" js-plus plus"></button>
+      </div>
+    </div>
+    <div class="c-direction ">
+      <img class="o-foto o-flesje" src="img/ronny.png" alt="rodenbach">
+      <div class="number-input">
+        <button  class="js-minus minus"></button>
+        <input class="js-quantity quantity" min="0" name="quantity" value="0" type="number">
+        <button  class=" js-plus plus"></button>
+      </div>
+    </div>
+    
+  </div>
+  <div class="o-layout o-layout--justify-center">
+    <input class="js-submit button " type="submit" value="Submit">
+
+  </div>
+
+</body>

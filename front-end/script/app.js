@@ -2,17 +2,22 @@ const lanIP = `${window.location.hostname}:5000`;
 const socket = io(`http://${lanIP}`);
 
 const showTable=function(){
-    socket.on("B2F_historiek", function(jsonObject){
+  socket.on("B2F_historiek", function(jsonObject){
+      htmlLijst=[]
     // console.log(jsonObject)
-    document.querySelector('.js-table').innerHTML+= `
-    <tr>
-    <td>${jsonObject.volgnummer} </td>
-    <td>${jsonObject.deviceid} </td>
-    <td>${jsonObject.actieid}</td>
-    <td>${jsonObject.actiedatum}</td>
-    <td>${jsonObject.waarde}</td>
-    <td>${jsonObject.commentaar}</td>
-  </tr>`
+    for(const item of jsonObject){
+     lijst= `
+      <tr>
+      <td>${item.volgnummer} </td>
+      <td>${item.deviceid} </td>
+      <td>${item.actieid}</td>
+      <td>${item.actiedatum}</td>
+      <td>${item.waarde}</td>
+      <td>${item.commentaar}</td>
+    </tr>`
+    htmlLijst+=lijst
+    }
+    document.querySelector('.js-table').innerHTML=htmlLijst
 
     
   })
@@ -39,9 +44,9 @@ const grafiek=function(){
   const data = {
     labels: labels,
     datasets: [{
-      label: 'My First dataset',
-      backgroundColor: 'rgb(255, 99, 132)',
-      borderColor: 'rgb(255, 99, 132)',
+      label: 'Temperatuur',
+      backgroundColor: 'rgb(255, 0, 0)',
+      borderColor: 'rgb(255, 0, 0)',
       data: datas,
     }]
   };
@@ -49,7 +54,15 @@ const grafiek=function(){
   const config = {
     type: 'line',
     data: data,
-    options: {}
+    options: {
+     scales: {
+      y: {
+        min: 15,
+        max: 30,
+      }
+      
+    }
+    }
   };
   const myChart = new Chart(
     document.getElementById('myChart'),
@@ -62,7 +75,7 @@ const grafiek=function(){
 
 
 const listenToUI = function () {
- if(window.location.pathname=='/index.html'){
+
   let btn = document.querySelector('.js-relais');
   console.log(btn)
   let status = 0
@@ -73,8 +86,11 @@ const listenToUI = function () {
     status=0
   }
   socket.emit('F2B_sent', {status})
-  })};
-}
+
+  }  
+  )
+
+};
 
 const listenToSocket = function () {
   socket.on("connected", function () {
@@ -98,13 +114,60 @@ const listenToSocket = function () {
     document.querySelector('.js-ip').innerHTML= `<p class="js-ip">wifi: ${ip}</p>`
 
       });
+    
+  
+};
+const frigo=function(){
+    socket.on("B2F_Frigo",function(){
+    console.log('hi')
+    window.location.replace("192.168.168.169/frigo");
+    window.location.pathname='/frigo.html'
+   
+  });
+   const log=document.querySelectorAll('.js-plus')
+   
+   for (let item of log){
+  
+     item .addEventListener("click",function(){
+       const input =item.parentNode.querySelector('input')  
+       input.value++
+      //  console.log(input.value)
+      })
+
+   }
+    const btn=document.querySelectorAll('.js-minus')
+   
+   for (let item of btn){
+
+     item.addEventListener("click",function(){
+       const input =item.parentNode.querySelector('input')  
+       if (input.value>0){
+         input.value--
+
+       }
+      //  console.log(input.value)
+      })
+
+   }
+   const submit=document.querySelector('.js-submit')
+   submit.addEventListener("click",function(){
+     let quantity=document.querySelectorAll('.js-quantity')
+     for(let btn of quantity){
+       console.log(btn.value)
+       window.location.replace("/")
+
+     }
+    //  console.log(quantity)
+   })
 
 };
+
 
 
 document.addEventListener("DOMContentLoaded", function () {
   console.log("DOM geladen 🍺");
   if(window.location.pathname=='/'){
+    
   listenToUI();
   listenToSocket();
   } 
@@ -112,5 +175,5 @@ document.addEventListener("DOMContentLoaded", function () {
   showTable();
   grafiek()
   }
-  
+  frigo()
 });

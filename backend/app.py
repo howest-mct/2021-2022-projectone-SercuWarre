@@ -38,15 +38,18 @@ def kaart_lezer():
                 id, text = reader.read()
                 print(id)
                 ids=str(id)
-                print(text)    
+                print(text)   
+                
                 open_door()
                 # time.sleep(1)
                 DataRepository.create_historiek(0,3,datetime.now(),0, "badge scanned")
                 data=DataRepository.read_user()
                 for item in data:
                     userid=item['userid']
+                    name=item['naam']
+                    # print(name)
                     if item['RFid']==ids:
-                        DataRepository.create_frigo_historiek(userid,datetime.now())
+                        DataRepository.create_frigo_historiek(userid,text,datetime.now())
             
                 time.sleep(0.001)
 
@@ -60,25 +63,15 @@ def temp_inlezen():
         while True:
             sensor_file = open(sensor_file_name)
             line = sensor_file.readlines()[-1]
+            # print(line)
             uitkomst = line[line.rfind("t"):]
+            # print(uitkomst)
             geheel = int(uitkomst[2:])
             temperatuur = geheel/1000
             if temperatuur<=temp_prev-0.08 or temperatuur>=temp_prev+0.08 :
                 print(f"T={temperatuur}")
                 DataRepository.create_historiek(1,0,datetime.now(),temperatuur, "temperatuur Waarde")
                 socketio.emit('B2F_send_temp', {'tempwaarde': temperatuur},broadcast=True)
-                item=DataRepository.read_temp()
-                # print(item)
-                status=[]
-                for i in item:
-                    # print(i)
-                    datum=str(i['actiedatum'])
-                    i['actiedatum']=datum
-                    status.append(i)
-                    
-                status.reverse()
-                socketio.emit('B2F_temp_chart',{'waarde':status},broadcast=True)
-               
                 temp_prev=temperatuur
             time.sleep(0.001)
 
@@ -121,7 +114,7 @@ def hallo():
 
 @app.route('/api/v1/temp/')
 def temp():
-    
+    print("hi")
     print('A new client connect')
     # # Send to the client!
    
@@ -129,15 +122,7 @@ def temp():
 @socketio.on('connect')
 def initial_connection():
     print('A new client connect')
-    status=DataRepository.read_historiek()
-    for item in status:
-        # print(item)
-        # print("/n")
-        datum=str(item['actiedatum'])
-        item['actiedatum']=datum
-        # print(item)
-        socketio.emit('B2F_historiek',  item)
-
+    
    
    
 
@@ -178,8 +163,32 @@ def start_chrome_kiosk():
     driver.get("http://localhost")
     while True:
         pass
+
+def stuur_data():
+    while True:
+        status=DataRepository.read_historiek()
+        lijst=[]
+        for item in status:
+            # print(item)
+            # print("/n")
+            datum=str(item['actiedatum'])
+            item['actiedatum']=datum
+            # print(item)
+            lijst.append(item)
+        socketio.emit('B2F_historiek',  lijst)
+        items=DataRepository.read_temp()
+        waarde=[]
+
+        for i in items:
+            datum=str(i['actiedatum'])
+            i['actiedatum']=datum
+            waarde.append(i)
+        waarde.reverse()
+        socketio.emit('B2F_temp_chart',{'waarde':waarde},broadcast=True)
+        time.sleep(5)
 def open_door():
     try:
+        socketio.emit('B2F_Frigo') 
         GPIO.output(6, GPIO.HIGH)
         DataRepository.create_historiek(0,2,datetime.now(),1, "deur open")
         print("deur open")
@@ -190,7 +199,7 @@ def open_door():
         time.sleep(0.001)
     
     except  Exception as x:
-        print(F"thread deur {x}")
+        print(F"deur {x}")
 def start_chrome_thread():
     print("**** Starting CHROME ****")
     chromeThread = threading.Thread(target=start_chrome_kiosk, args=(), daemon=True)
@@ -210,6 +219,10 @@ def start_rfid_thread():
     Rfid = threading.Thread(target=kaart_lezer, args=(), daemon=True)
     Rfid.start()
 
+def start_send_data_thread():
+    print("**** Starting send data ****")
+    data = threading.Thread(target=stuur_data, args=(), daemon=True)
+    data.start()
 # ANDERE FUNCTIES
 
 
@@ -222,7 +235,7 @@ if __name__ == '__main__':
         start_temp_thread()    
         start_ip_thread()
         start_rfid_thread()
-
+        start_send_data_thread()
         # time.sleep(2)
         stop=time.time()
         
