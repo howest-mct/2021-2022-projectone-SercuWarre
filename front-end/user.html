@@ -14,30 +14,42 @@
     <script src="https://cdn.socket.io/4.0.1/socket.io.min.js" integrity="sha384-LzhRnpGmQP+lOvWruF/lgkcqD+WDVt9fU3H4BWmwP5u5LTmkUGafMcpZKNObVMLU" crossorigin="anonymous"></script>
     <script src="script/app.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- <script src="script/utils.js "></script> -->
+    
     <meta http-equiv="refresh" content="60">
 </head>
 <body>
-<a href="/"> <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16">
-  <path id="path" d="M20,11H7.8l5.6-5.6L12,4,4,12l8,8,1.4-1.4L7.8,13H20V11Z" transform="translate(-4 -4)" fill="#005980" fill-rule="evenodd" opacity="0.54"/>
-</svg></a>
+   <div class="o-layout  u-1-of-2">
+    <div class=" u-1-of-2" >
 
-<div>
+      <a href="/"> <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16">
+    <path id="path" d="M20,11H7.8l5.6-5.6L12,4,4,12l8,8,1.4-1.4L7.8,13H20V11Z" transform="translate(-4 -4)" fill="#005980" fill-rule="evenodd" opacity="0.54"/>
+    </svg></a>
+    </div>
+   
+  <div class=" js-power  u-1-of-2 o-layout--justify-end">
+    <img class="c-power" src="img/power-off-off-svgrepo-com.svg" alt="">
+  </div>
+
+  </div>
   <br>
-  <canvas class="chart o-foto" id="myChart"></canvas>
+  <canvas class="chart o-foto" id="chart"></canvas>
 </div>
 <div class="c-table">
   <table  >
       <thead class="c-table-head">
         <tr>
-      <th>volgnummer</th>
-      <th>actiedatum</th>
-      <th>commentaar</th>
+      <th>naam</th>
+      <th>datum</th>
+      <th>bier</th>
+      <th>aantal</th>
     </tr>
       </thead>
-  <tbody class="js-table c-table c-table-body">
+  <tbody class="js-table-frigo c-table c-table-body">
   
   </tbody>
 </table>
 </div>
+
 
 </body>

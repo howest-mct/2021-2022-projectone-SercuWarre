@@ -1,4 +1,4 @@
-sensor_file_name = '/sys/bus/w1/devices/28-22c662000900/w1_slave'
+sensor_file_name = '/sys/bus/w1/devices/28-03219779d03f/w1_slave'
 while True:
         sensor_file = open(sensor_file_name)
         line = sensor_file.readlines()[-1]

@@ -1,4 +1,5 @@
 import time
+from tkinter import image_types
 from RPi import GPIO
 from mfrc522 import SimpleMFRC522
 from MFRC522 import MFRC522
@@ -14,14 +15,14 @@ from flask import Flask, jsonify
 from repositories.DataRepository import DataRepository
 from datetime import datetime
 from subprocess import check_output
-
+import os
 from selenium import webdriver
         
         
 
 # from selenium import webdriver
 # from selenium.webdriver.chrome.options import Options
-sensor_file_name = '/sys/bus/w1/devices/28-22c662000900/w1_slave'
+sensor_file_name = '/sys/bus/w1/devices/28-03219779d03f/w1_slave'
 
 # Code voor Hardware
 def setup_gpio():
@@ -29,6 +30,8 @@ def setup_gpio():
     GPIO.setmode(GPIO.BCM)
     GPIO.setup(6, GPIO.OUT)
     GPIO.output(6, GPIO.LOW)
+    GPIO.setup (21, GPIO .IN, pull_up_down = GPIO.PUD_UP)
+
 
 def kaart_lezer():
     try:
@@ -39,17 +42,17 @@ def kaart_lezer():
                 print(id)
                 ids=str(id)
                 print(text)   
-                
                 open_door()
-                # time.sleep(1)
+                socketio.emit('B2F_user',{'user':ids},broadcast=True)
                 DataRepository.create_historiek(0,3,datetime.now(),0, "badge scanned")
-                data=DataRepository.read_user()
-                for item in data:
-                    userid=item['userid']
-                    name=item['naam']
-                    # print(name)
-                    if item['RFid']==ids:
-                        DataRepository.create_frigo_historiek(userid,text,datetime.now())
+                # time.sleep(1)
+                # data=DataRepository.read_user()
+                # for item in data:
+                #     userid=item['userid']
+                #     name=item['naam']
+                #     # print(name)
+                #     if item['RFid']==ids:
+                #         # DataRepository.create_frigo_historiek(userid,text,datetime.now())
             
                 time.sleep(0.001)
 
@@ -59,24 +62,24 @@ def kaart_lezer():
                
 def temp_inlezen():
     temp_prev=0
-    try:
-        while True:
-            sensor_file = open(sensor_file_name)
-            line = sensor_file.readlines()[-1]
-            # print(line)
-            uitkomst = line[line.rfind("t"):]
-            # print(uitkomst)
-            geheel = int(uitkomst[2:])
-            temperatuur = geheel/1000
-            if temperatuur<=temp_prev-0.08 or temperatuur>=temp_prev+0.08 :
-                print(f"T={temperatuur}")
-                DataRepository.create_historiek(1,0,datetime.now(),temperatuur, "temperatuur Waarde")
-                socketio.emit('B2F_send_temp', {'tempwaarde': temperatuur},broadcast=True)
-                temp_prev=temperatuur
-            time.sleep(0.001)
+    # try:  
+    while True:
+        sensor_file = open(sensor_file_name)
+        line = sensor_file.readlines()[-1]
+        # print(line)
+        uitkomst = line[line.rfind("t"):]
+        # print(uitkomst)
+        geheel = int(uitkomst[2:])
+        temperatuur = geheel/1000
+        if temperatuur<=temp_prev-0.08 or temperatuur>=temp_prev+0.08 :
+            print(f"T={temperatuur}")
+            DataRepository.create_historiek(1,0,datetime.now(),temperatuur, "temperatuur Waarde")
+            socketio.emit('B2F_send_temp', {'tempwaarde': temperatuur},broadcast=True)
+            temp_prev=temperatuur
+        time.sleep(0.001)
 
-    except  Exception as x:
-        print(F"thread temp {x}")
+    # except  Exception as x:
+        # print(F"thread temp {x}")
 def get_ip():
     # perv_wifi=""
     try:
@@ -117,14 +120,24 @@ def temp():
     print("hi")
     print('A new client connect')
     # # Send to the client!
-   
 
+@app.route('/users')
+def user():
+    return  jsonify( DataRepository.read_user())
+
+@app.route('/drinks')
+def drinks():
+    return jsonify(DataRepository.Read_drinks())
 @socketio.on('connect')
 def initial_connection():
     print('A new client connect')
     
    
    
+@socketio.on('F2B_power')
+def power():
+    print("shutting down")
+    # os.system("sudo shutdown -h now") +
 
 
 
@@ -133,9 +146,34 @@ def initial_connection():
 def listenToBtn(data):
     open_door()
 
-
-
-
+@socketio.on('F2B_update_min_fridge')
+def updatefridge(data):
+    print(data)
+    dict=data['dict']
+    user=dict['users']
+    bieren=[dict['bier']]
+    print(bieren)
+    teller=1
+    for item in bieren:
+        for i in item:
+            print(i)
+            if i !='0':
+                DataRepository.create_frigo_historiek(user,teller,datetime.now(),i)
+                DataRepository.update_drinks_min(i,teller)
+            teller+=1
+@socketio.on('F2B_update_plus_fridge')
+def update_fridge(data):
+    # print(data)
+    dict=data['dict']
+    bier=[dict['bier']]
+    # print(bieren)
+    teller=1
+    for item in bier:
+        for i in item:
+            # print(i)
+            if i !='0':
+                DataRepository.update_drinks_plus(i,teller)
+            teller+=1
 def start_chrome_kiosk():
     import os
 
@@ -167,7 +205,24 @@ def start_chrome_kiosk():
 def stuur_data():
     while True:
         status=DataRepository.read_historiek()
+        users=DataRepository.read_frigo_historiek()
+        bar=DataRepository.read_bar()
+        frigoLijst=[]
         lijst=[]
+        barlijst=[]
+        for b in bar:
+            aantal=str(b['aantal'])
+            b['aantal']=aantal
+            date=str(b['datum'])
+            b['datum']=date
+            barlijst.append(b)
+        socketio.emit('B2F_bar_grafiek',barlijst)
+        for i in users:
+            
+            date=str(i['datum'])
+            i['datum']=date
+            frigoLijst.append(i)
+        socketio.emit('B2F_frigo_historiek',frigoLijst)
         for item in status:
             # print(item)
             # print("/n")
@@ -185,6 +240,7 @@ def stuur_data():
             waarde.append(i)
         waarde.reverse()
         socketio.emit('B2F_temp_chart',{'waarde':waarde},broadcast=True)
+        
         time.sleep(5)
 def open_door():
     try:
@@ -192,7 +248,13 @@ def open_door():
         GPIO.output(6, GPIO.HIGH)
         DataRepository.create_historiek(0,2,datetime.now(),1, "deur open")
         print("deur open")
-        time.sleep(3)
+        input = GPIO.input (21)
+        while input!=1:
+            input = GPIO.input (21)
+            print (input)
+            time.sleep (0.2)
+        
+        time.sleep(1)
         GPIO.output(6, GPIO.LOW)
         DataRepository.create_historiek(0,1,datetime.now(),0, "deur toe")
         print("deur toe")
@@ -237,10 +299,10 @@ if __name__ == '__main__':
         start_rfid_thread()
         start_send_data_thread()
         # time.sleep(2)
-        stop=time.time()
         
-        print(stop-start)
         print("**** Starting APP ****")
+        stop=time.time()
+        print(stop-start)
         socketio.run(app, debug=False, host='0.0.0.0')
     except KeyboardInterrupt:
         print ('KeyboardInterrupt exception is caught')
