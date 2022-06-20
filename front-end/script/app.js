@@ -46,6 +46,7 @@ socket.on("B2F_bar_grafiek",function(jsonObject){
     let aantal_jup=[]
     let aantal_stella=[]
     let aantal_rodenbach=[]
+    
     console.log(jsonObject)
     for (item of jsonObject){
       if (!lijst.includes(item.naam)){
@@ -123,7 +124,7 @@ const config = {
     plugins: {
       title: {
         display: true,
-        text: 'Chart.js Bar Chart - Stacked'
+        text: 'aantal drankjes per gebruiker'
       },
     },
     responsive: true,
